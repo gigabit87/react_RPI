@@ -1,23 +1,42 @@
-import { JSX } from "react";
-import { CitiesCard } from "../../components/cities-card/cities-card";
+import { JSX, useState } from "react";
+import { CitiesCardList } from "../../components/cities-card-list/cities-card-list";
+import { CitiesList } from "../../components/cities-list/cities-list";
+import { SortOptions } from "../../components/sort-options/sort-options";
+import { Map } from "../../components/map/map";
 import { Header } from "../../components/header/header";
-import { useAppSelector, useAppDispatch } from "../../store/hooks";
-import { Cities } from "../../const";
-import { setSelectedCity } from "../../store/slices/offers-slice";
+import { useAppSelector } from "../../store/hooks";
+import { getOffersByCity, sortOffersByType } from "../../utils";
+import { OffersList } from "../../types/offer";
+import { SortOffer } from "../../types/sort";
 
 type MainPageProps = {
-    rentalOffersCount: number;
+    offersList?: OffersList[];
 }
 
-function MainPage({rentalOffersCount} : MainPageProps): JSX.Element {
-    const { offers, selectedCity } = useAppSelector((state) => state.offers);
-    const dispatch = useAppDispatch();
-    const cityOffers = offers.filter((offer) => offer.city.name === selectedCity);
-    const displayedOffers = cityOffers.slice(0, 5);
+function MainPage({offersList} : MainPageProps): JSX.Element {
+    const selectedCity = useAppSelector((state) => state.city);
+    const offers = useAppSelector((state) => state.offers);
+    const [selectedOfferId, setSelectedOfferId] = useState<string | null>(null);
+    const [activeSort, setActiveSort] = useState<SortOffer>('Popular');
+    
+    // Используем offersList если передан, иначе используем из Redux
+    const allOffers = offersList || offers;
+    const selectedCityOffers = getOffersByCity(selectedCity?.name, allOffers);
+    const sortedOffers = sortOffersByType(selectedCityOffers, activeSort);
 
-    const handleCityClick = (city: string) => {
-      dispatch(setSelectedCity(city));
-    };
+    // Получаем данные города для карты
+    const cityData = selectedCity?.location || 
+      { latitude: 52.3702157, longitude: 4.8951679, zoom: 13 };
+
+    // Подготавливаем точки для карты
+    const mapPoints = sortedOffers.map(offer => ({
+      id: offer.id,
+      location: offer.location,
+      title: offer.title
+    }));
+
+    const rentalOffersCount = sortedOffers.length;
+
     return(<div className ="page page--gray page--main">
       <Header />
 
@@ -25,68 +44,39 @@ function MainPage({rentalOffersCount} : MainPageProps): JSX.Element {
         <h1 className ="visually-hidden">Cities</h1>
         <div className ="tabs">
           <section className ="locations container">
-            <ul className ="locations__list tabs__list">
-              {Cities.map((city) => (
-                <li key={city} className ="locations__item">
-                  <a 
-                    className={`locations__item-link tabs__item ${selectedCity === city ? 'tabs__item--active' : ''}`}
-                    href="#"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handleCityClick(city);
-                    }}
-                  >
-                    <span>{city}</span>
-                  </a>
-                </li>
-              ))}
-            </ul>
+            <CitiesList selectedCity={selectedCity} />
           </section>
         </div>
         <div className ="cities">
           <div className ="cities__places-container container">
             <section className ="cities__places places">
               <h2 className ="visually-hidden">Places</h2>
-              <b className ="places__found">{cityOffers.length} places to stay in {selectedCity}</b>
-              <form className ="places__sorting" action="#" method="get">
-                <span className ="places__sorting-caption">Sort by</span>
-                <span className ="places__sorting-type" tabIndex={0}>
-                  Popular
-                  <svg className="places__sorting-arrow" width="7" height="4">
-                    <use href="#icon-arrow-select"></use>
-                  </svg>
-                </span>
-                <ul className="places__options places__options--custom places__options--opened">
-                  <li className="places__option places__option--active" tabIndex={0}>Popular</li>
-                  <li className="places__option" tabIndex={0}>Price: low to high</li>
-                  <li className="places__option" tabIndex={0}>Price: high to low</li>
-                  <li className="places__option" tabIndex={0}>Top rated first</li>
-                </ul>
-              </form>
-              <div className="cities__places-list places__list tabs__content">
-                {displayedOffers.length > 0 ? (
-                  displayedOffers.map((offer) => (
-                    <CitiesCard
-                      key={offer.id}
-                      id={offer.id}
-                      title={offer.title}
-                      type={offer.type}
-                      price={offer.price}
-                      isPremium={offer.isPremium}
-                      previewImage={offer.images[0] || 'img/apartment-01.jpg'}
-                      rating={offer.rating}
-                      isFavorite={offer.isFavorite}
-                    />
-                  ))
-                ) : (
+              <b className ="places__found">{rentalOffersCount} places to stay in {selectedCity?.name}</b>
+              <SortOptions 
+                activeSorting={activeSort} 
+                onChange={(newSorting) => setActiveSort(newSorting)} 
+              />
+              {sortedOffers.length > 0 ? (
+                <CitiesCardList 
+                  offersList={sortedOffers}
+                  onCardHover={setSelectedOfferId}
+                  onCardLeave={() => setSelectedOfferId(null)}
+                />
+              ) : (
+                <div className="cities__places-list places__list tabs__content">
                   <div className="cities__no-places">
-                    <p>No places available in {selectedCity}</p>
+                    <p>No places available in {selectedCity?.name}</p>
                   </div>
-                )}
-              </div>
+                </div>
+              )}
             </section>
             <div className="cities__right-section">
-              <section className="cities__map map"></section>
+              <Map 
+                city={cityData}
+                points={mapPoints}
+                selectedPoint={selectedOfferId}
+                className="cities__map"
+              />
             </div>
           </div>
         </div>

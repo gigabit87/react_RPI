@@ -1,11 +1,15 @@
 import { JSX } from "react";
 
-function OfferInsideItem(): JSX.Element{
-    return(
-        <li className="offer__inside-item">
-                    Wi-Fi
-                  </li>
-    )
+type OfferInsideItemProps = {
+  good: string;
+};
+
+function OfferInsideItem({ good }: OfferInsideItemProps): JSX.Element {
+  return (
+    <li className="offer__inside-item">
+      {good}
+    </li>
+  );
 }
 
 export { OfferInsideItem };

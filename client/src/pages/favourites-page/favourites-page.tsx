@@ -4,7 +4,7 @@ import { Header } from "../../components/header/header";
 import { useAppSelector } from "../../store/hooks";
 
 function FavoritesPage(): JSX.Element {
-    const { offers } = useAppSelector((state) => state.offers);
+    const offers = useAppSelector((state) => state.offers) || [];
     const favoriteOffers = offers.filter((offer) => offer.isFavorite);
     
     // Группируем по городам

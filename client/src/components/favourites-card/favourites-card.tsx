@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { FullOffer } from "../../types/offer";
 import { AppRoute } from "../../const";
 import { useAppDispatch } from "../../store/hooks";
-import { toggleFavorite } from "../../store/slices/offers-slice";
+import { toggleFavorite } from "../../store/action";
 
 type FavoritesCardProps = {
   offer: FullOffer;
@@ -27,11 +27,11 @@ function FavoritesCard({ offer }: FavoritesCardProps): JSX.Element{
       )}
       <div className="favorites__image-wrapper place-card__image-wrapper">
         <Link to={`${AppRoute.Offer}/${offer.id}`}>
-          <img 
-            className="place-card__image" 
-            src={offer.images[0]?.startsWith('img/') ? offer.images[0] : `img/${offer.images[0] || 'apartment-small-03.jpg'}`} 
-            width="150" 
-            height="110" 
+          <img
+            className="place-card__image"
+            src={offer.images?.[0]?.startsWith('/') ? offer.images[0] : `/${offer.images?.[0] || 'img/apartment-small-03.jpg'}`}
+            width="150"
+            height="110"
             alt="Place image"
           />
         </Link>

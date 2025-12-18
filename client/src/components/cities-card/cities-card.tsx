@@ -1,7 +1,8 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { AppRoute } from "../../const";
 import { useAppDispatch } from "../../store/hooks";
-import { toggleFavorite } from "../../store/slices/offers-slice";
+import { toggleFavorite } from "../../store/action";
 
 type CitiesCardProps = {
   id: string;
@@ -12,10 +13,13 @@ type CitiesCardProps = {
   previewImage: string;
   rating: number;
   isFavorite?: boolean;
+  onMouseEnter?: (id: string) => void;
+  onMouseLeave?: () => void;
 }
 
-function CitiesCard({ id, title, type, price, previewImage, isPremium, rating, isFavorite = false}: CitiesCardProps ) {
+function CitiesCard({ id, title, type, price, previewImage, isPremium, rating, isFavorite = false, onMouseEnter, onMouseLeave}: CitiesCardProps ) {
   const dispatch = useAppDispatch();
+  const [, setOfferId] = useState('');
   const ratingPercent = Math.round(rating * 20);
 
   const handleFavoriteClick = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -23,8 +27,22 @@ function CitiesCard({ id, title, type, price, previewImage, isPremium, rating, i
     dispatch(toggleFavorite(id));
   };
 
+  const handleMouseEnter = () => {
+    setOfferId(id);
+    onMouseEnter?.(id);
+  };
+
+  const handleMouseLeave = () => {
+    setOfferId('');
+    onMouseLeave?.();
+  };
+
   return (
-    <article className="cities__card place-card">
+    <article 
+      className="cities__card place-card"
+      onMouseOver={handleMouseEnter}
+      onMouseOut={handleMouseLeave}
+    >
       {isPremium && (
         <div className="place-card__mark">
           <span>Premium</span>
@@ -34,7 +52,7 @@ function CitiesCard({ id, title, type, price, previewImage, isPremium, rating, i
         <Link to={`${AppRoute.Offer}/${id}`}>
           <img 
             className="place-card__image" 
-            src={previewImage.startsWith('img/') ? previewImage : `img/${previewImage}`} 
+            src={previewImage.startsWith('/') ? previewImage : `/${previewImage}`} 
             width="260" 
             height="200" 
             alt="Place image"

@@ -5,10 +5,10 @@ import App from './components/app/app'
 import { store } from './store'
 import { Setting } from './const'
 import { offers } from './mocks/offers'
-import { setOffers } from './store/slices/offers-slice'
+import { offersList } from './mocks/offers-list'
+import { offersCityList } from './store/action'
 
-// Инициализируем store с моковыми данными
-store.dispatch(setOffers(offers))
+store.dispatch(offersCityList(offersList))
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -17,10 +17,10 @@ const root = ReactDOM.createRoot(
 root.render(
   <React.StrictMode>
     <Provider store={store}>
-      <App 
-        rentalOffersCount={Setting.rentOffersCount}
-        offers={offers}
-      />
+    <App 
+      offers={offers}
+        offersList={offersList}
+    />
     </Provider>
   </React.StrictMode>
 )

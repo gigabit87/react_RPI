@@ -7,8 +7,8 @@ type UserState = {
 };
 
 const initialState: UserState = {
-  authorizationStatus: AutorizationStatus.NoAuth,
-  email: null,
+  authorizationStatus: AutorizationStatus.Auth,
+  email: 'user@example.com',
 };
 
 const userSlice = createSlice({

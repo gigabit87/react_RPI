@@ -11,7 +11,7 @@ function LoginPage(): JSX.Element {
     const [password, setPassword] = useState('');
     const navigate = useNavigate();
     const dispatch = useAppDispatch();
-    const { selectedCity } = useAppSelector((state) => state.offers);
+    useAppSelector((state) => state.offers);
 
     const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();

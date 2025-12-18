@@ -1,5 +1,5 @@
 import { JSX } from "react";
-import { FavoritesCard } from "../favourites-card/favourites-card";
+import { FavoriteCardList } from "../favorite-card-list/favorite-card-list";
 import { FullOffer } from "../../types/offer";
 
 type FavoritesLocationItemsProps = {
@@ -17,11 +17,7 @@ function FavoritesLocationItems({ city, offers }: FavoritesLocationItemsProps): 
             </a>
           </div>
         </div>
-        <div className="favorites__places">
-          {offers.map((offer) => (
-            <FavoritesCard key={offer.id} offer={offer} />
-          ))}
-        </div>
+        <FavoriteCardList offers={offers} />
       </li>
     )
 }

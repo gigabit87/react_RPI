@@ -16,7 +16,7 @@ function ReviewsItem({ review }: ReviewsItemProps): JSX.Element{
                 <div className="reviews__avatar-wrapper user__avatar-wrapper">
                     <img 
                         className="reviews__avatar user__avatar" 
-                        src={review.user.avatarUrl.startsWith('img/') ? review.user.avatarUrl : `img/${review.user.avatarUrl}`} 
+                        src={review.user.avatarUrl.startsWith('/') ? review.user.avatarUrl : `/img/${review.user.avatarUrl}`} 
                         width="54" 
                         height="54" 
                         alt="Reviews avatar"

@@ -1,12 +1,13 @@
-import { JSX, useEffect, useState } from "react";
+import { JSX, useMemo, useState, useEffect } from "react";
 import { useParams, Navigate } from "react-router-dom";
 import { OfferInsideItem } from "../../components/offer-inside-item/offer-inside-item";
 import { CitiesCard } from "../../components/cities-card/cities-card";
-import { FormRatingInput } from "../../components/form-rating-input/form-rating-input";
-import { ReviewsItem } from "../../components/reviews-item/reviews-item";
+import { ReviewsList } from "../../components/reviews-list/reviews-list";
+import { ReviewForm } from "../../components/review-form/review-form";
+import { Map } from "../../components/map/map";
 import { Header } from "../../components/header/header";
-import { useAppSelector, useAppDispatch } from "../../store/hooks";
-import { setSelectedOffer, toggleFavorite } from "../../store/slices/offers-slice";
+import { useAppDispatch } from "../../store/hooks";
+import { toggleFavorite } from "../../store/action";
 import { AppRoute } from "../../const";
 import { FullOffer } from "../../types/offer";
 import { reviews } from "../../mocks/reviews";
@@ -18,36 +19,42 @@ type OfferProps = {
 function OfferPage({ offers }: OfferProps): JSX.Element{
     const { id } = useParams<{ id: string }>();
     const dispatch = useAppDispatch();
-    const { selectedOffer } = useAppSelector((state) => state.offers);
+    
+    const foundOffer = useMemo(() => {
+        if (!id || offers.length === 0) {
+            return null;
+        }
+        return offers.find((o) => o.id === id) || null;
+    }, [id, offers]);
+    
+    const [selectedOffer, setSelectedOffer] = useState<FullOffer | null>(foundOffer);
     
     useEffect(() => {
-        if (id) {
-            const offer = offers.find((o) => o.id === id);
-            if (offer) {
-                dispatch(setSelectedOffer(offer));
-            }
-        }
-    }, [id, offers, dispatch]);
+        setSelectedOffer(foundOffer);
+    }, [foundOffer]);
 
     if (!id || !selectedOffer) {
-        return <Navigate to={AppRoute.Main} />;
+        return <Navigate to={AppRoute.Main} replace />;
     }
 
     const ratingPercent = Math.round(selectedOffer.rating * 20);
     const nearbyOffers = offers
         .filter((offer) => offer.city.name === selectedOffer.city.name && offer.id !== selectedOffer.id)
         .slice(0, 3);
-    
-    const [selectedRating, setSelectedRating] = useState(0);
-    const [reviewText, setReviewText] = useState('');
-    
-    const handleReviewSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        // В реальном приложении здесь был бы API запрос
-        console.log('Review submitted:', { rating: selectedRating, text: reviewText });
-        setSelectedRating(0);
-        setReviewText('');
-    };
+
+    // Подготавливаем точки для карты (текущее предложение + ближайшие)
+    const mapPoints = [
+      {
+        id: selectedOffer.id,
+        location: selectedOffer.location,
+        title: selectedOffer.title
+      },
+      ...nearbyOffers.map(offer => ({
+        id: offer.id,
+        location: offer.location,
+        title: offer.title
+      }))
+    ];
     return(
     <div className="page">
       <Header />
@@ -60,7 +67,7 @@ function OfferPage({ offers }: OfferProps): JSX.Element{
                 <div key={index} className="offer__image-wrapper">
                   <img 
                     className="offer__image" 
-                    src={image.startsWith('img/') ? image : `img/${image}`} 
+                    src={image.startsWith('/') ? image : `/${image}`} 
                     alt={`Photo ${index + 1}`}
                   />
                 </div>
@@ -81,7 +88,10 @@ function OfferPage({ offers }: OfferProps): JSX.Element{
                 <button 
                   className={`offer__bookmark-button button ${selectedOffer.isFavorite ? 'offer__bookmark-button--active' : ''}`}
                   type="button"
-                  onClick={() => dispatch(toggleFavorite(selectedOffer.id))}
+                  onClick={() => {
+                    dispatch(toggleFavorite(selectedOffer.id));
+                    setSelectedOffer({ ...selectedOffer, isFavorite: !selectedOffer.isFavorite });
+                  }}
                 >
                   <svg className="offer__bookmark-icon" width="31" height="33">
                     <use href="#icon-bookmark"></use>
@@ -125,7 +135,7 @@ function OfferPage({ offers }: OfferProps): JSX.Element{
                   <div className={`offer__avatar-wrapper ${selectedOffer.host.isPro ? 'offer__avatar-wrapper--pro' : ''} user__avatar-wrapper`}>
                     <img 
                       className="offer__avatar user__avatar" 
-                      src={selectedOffer.host.avatarUrl.startsWith('img/') ? selectedOffer.host.avatarUrl : `img/${selectedOffer.host.avatarUrl}`} 
+                      src={selectedOffer.host.avatarUrl.startsWith('/') ? selectedOffer.host.avatarUrl : `/img/${selectedOffer.host.avatarUrl}`} 
                       width="74" 
                       height="74" 
                       alt="Host avatar"
@@ -147,71 +157,17 @@ function OfferPage({ offers }: OfferProps): JSX.Element{
                 </div>
               </div>
               <section className="offer__reviews reviews">
-                <h2 className="reviews__title">Reviews &middot; <span className="reviews__amount">{reviews.length}</span></h2>
-                <ul className="reviews__list">
-                  {reviews.map((review) => (
-                    <ReviewsItem key={review.id} review={review} />
-                  ))}
-                </ul>
-                <form className="reviews__form form" action="#" method="post" onSubmit={handleReviewSubmit}>
-                  <label className="reviews__label form__label" htmlFor="review">Your review</label>
-                  <div className="reviews__rating-form form__rating">
-                    <FormRatingInput 
-                      value={5} 
-                      title="perfect" 
-                      checked={selectedRating === 5}
-                      onChange={setSelectedRating}
-                    />
-                    <FormRatingInput 
-                      value={4} 
-                      title="good" 
-                      checked={selectedRating === 4}
-                      onChange={setSelectedRating}
-                    />
-                    <FormRatingInput 
-                      value={3} 
-                      title="not bad" 
-                      checked={selectedRating === 3}
-                      onChange={setSelectedRating}
-                    />
-                    <FormRatingInput 
-                      value={2} 
-                      title="badly" 
-                      checked={selectedRating === 2}
-                      onChange={setSelectedRating}
-                    />
-                    <FormRatingInput 
-                      value={1} 
-                      title="terribly" 
-                      checked={selectedRating === 1}
-                      onChange={setSelectedRating}
-                    />
-                  </div>
-                  <textarea 
-                    className="reviews__textarea form__textarea" 
-                    id="review" 
-                    name="review" 
-                    placeholder="Tell how was your stay, what you like and what can be improved"
-                    value={reviewText}
-                    onChange={(e) => setReviewText(e.target.value)}
-                  />
-                  <div className="reviews__button-wrapper">
-                    <p className="reviews__help">
-                      To submit review please make sure to set <span className="reviews__star">rating</span> and describe your stay with at least <b className="reviews__text-amount">50 characters</b>.
-                    </p>
-                    <button 
-                      className="reviews__submit form__submit button" 
-                      type="submit"
-                      disabled={!selectedRating || reviewText.length < 50}
-                    >
-                      Submit
-                    </button>
-                  </div>
-                </form>
+                <ReviewsList reviews={reviews} />
+                <ReviewForm />
               </section>
             </div>
           </div>
-          <section className="offer__map map"></section>
+          <Map 
+            city={selectedOffer.city.location}
+            points={mapPoints}
+            selectedPoint={selectedOffer.id}
+            className="offer__map"
+          />
         </section>
         <div className="container">
           <section className="near-places places">
