@@ -102,5 +102,44 @@ export const getFullOffer = async (req, res, next) => {
   }
 };
 
+const getFavoriteOffers = async (req, res, next) => {
+    try {
+        const favoriteOffers = await Offer.findAll({
+            where: { isFavorite: true },
+            include: [{ 
+                model: User, 
+                as: 'author',
+                attributes: ['id', 'username', 'avatar', 'userType']
+            }]
+        });
 
-export {getAllOffers};
+        const adaptedOffers = favoriteOffers.map(adaptOfferToClient);
+        
+        res.status(200).json(adaptedOffers);
+        
+    } catch (error) {
+        console.error('Error in getFavoriteOffers:', error);
+        next(ApiError.internal('Не удалось получить список избранных предложений'));
+    }
+};
+
+const toggleFavorite = async (req, res, next) => {
+  try {
+    const { offerId, status } = req.params;
+
+    const offer = await Offer.findByPk(offerId);
+    if (!offer) {
+      return next(ApiError.notFound('Предложение не найдено'));
+    }
+
+    offer.isFavorite = status === '1';
+    await offer.save();
+
+    res.json(offer);
+  } catch (error) {
+    next(ApiError.internal('Ошибка при обновлении статуса избранного'));
+  }
+};
+
+
+export {getAllOffers, getFavoriteOffers, toggleFavorite};
