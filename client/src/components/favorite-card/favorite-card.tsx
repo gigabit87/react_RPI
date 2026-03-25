@@ -3,19 +3,26 @@ import { Link } from "react-router-dom";
 import { FullOffer } from "../../types/offer";
 import { AppRoute } from "../../const";
 import { useAppDispatch } from "../../store/hooks";
-import { toggleFavorite } from "../../store/action";
+import { toggleFavoriteAction } from "../../store/api-action";
 
 type FavoriteCardProps = {
   offer: FullOffer;
 };
 
-function FavoriteCard({ offer }: FavoriteCardProps): JSX.Element{
+function FavoriteCard({ offer }: FavoriteCardProps): JSX.Element {
   const dispatch = useAppDispatch();
   const ratingPercent = Math.round(offer.rating * 20);
 
   const handleFavoriteClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    dispatch(toggleFavorite(offer.id));
+    e.stopPropagation();
+    dispatch(toggleFavoriteAction({ offerId: offer.id, status: 0 }));
+  };
+
+  const getImageUrl = () => {
+    if (!offer.previewImage) return '/img/apartment-small-03.jpg';
+    if (offer.previewImage.startsWith('http')) return offer.previewImage;
+    return `http://localhost:5000${offer.previewImage}`;
   };
 
   return (
@@ -29,10 +36,10 @@ function FavoriteCard({ offer }: FavoriteCardProps): JSX.Element{
         <Link to={`${AppRoute.Offer}/${offer.id}`}>
           <img
             className="place-card__image"
-            src={offer.images?.[0]?.startsWith('/') ? offer.images[0] : `/${offer.images?.[0] || 'img/apartment-small-03.jpg'}`}
+            src={getImageUrl()}
             width="150"
             height="110"
-            alt="Place image"
+            alt={offer.title}
           />
         </Link>
       </div>
@@ -69,4 +76,3 @@ function FavoriteCard({ offer }: FavoriteCardProps): JSX.Element{
 }
 
 export { FavoriteCard };
-

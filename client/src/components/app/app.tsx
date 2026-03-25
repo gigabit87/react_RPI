@@ -8,15 +8,9 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { AppRoute, AuthorizationStatus } from "../../const";
 import { PrivateRoute } from "../private-route/private-route";
 import { useAppSelector } from '../../store/hooks';
-import { LoadingPage } from '../../pages/loading-page/loading-page';
 
 function App(): JSX.Element {
     const authorizationStatus = useAppSelector((state) => state.authorizationStatus);
-    const isOffersDataLoading = useAppSelector((state) => state.isOffersDataLoading);
-
-    if (authorizationStatus === AuthorizationStatus.Unknown || isOffersDataLoading) {
-        return <LoadingPage />;
-    }
 
     return(
         <BrowserRouter>
@@ -39,7 +33,7 @@ function App(): JSX.Element {
                 />
                 <Route 
                     path={`${AppRoute.Offer}/:id`} 
-                    element={<OfferPage />}  
+                    element={<OfferPage />} 
                 />
                 <Route 
                     path={'*'} 

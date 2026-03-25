@@ -7,13 +7,12 @@ const cityCoordinates = {
    Dusseldorf: { latitude: 51.2277, longitude: 6.7735, zoom: 13 }
  };
  
- const getBaseUrl = () => `http://localhost:5000`; // ← упрощаем
+ const getBaseUrl = () => `http://localhost:5000`;
  
  const adaptOfferToClient = (offer) => {
    const baseUrl = getBaseUrl();
    const cityLocation = cityCoordinates[offer.city];
    
-   // Формируем полный URL для previewImage
    let previewImage = offer.previewImage;
    if (previewImage && !previewImage.startsWith('http')) {
      previewImage = `${baseUrl}${previewImage}`;
@@ -47,9 +46,25 @@ export const adaptFullOfferToClient = (offer) => {
     ? `${baseUrl}${offer.previewImage}` 
     : offer.previewImage;
 
-  const images = offer.photos ? offer.photos.map(photo => 
-    photo.startsWith('http') ? photo : `${baseUrl}${photo}`
-  ) : [];
+  const images = offer.photos && offer.photos.length > 0 
+    ? offer.photos.map(photo => photo.startsWith('http') ? photo : `${baseUrl}${photo}`)
+    : [previewImage];
+
+  const goods = offer.features && offer.features.length > 0 
+    ? offer.features 
+    : ['Wi-Fi', 'Heating', 'Kitchen'];
+
+  const host = offer.author ? {
+    name: offer.author.username,
+    avatarUrl: offer.author.avatar && !offer.author.avatar.startsWith('http') 
+      ? `${baseUrl}${offer.author.avatar}` 
+      : offer.author.avatar || '/img/avatar.svg',
+    isPro: offer.author.userType === 'pro'
+  } : {
+    name: 'Unknown',
+    avatarUrl: '/img/avatar.svg',
+    isPro: false
+  };
 
   return {
     id: String(offer.id),
@@ -70,19 +85,11 @@ export const adaptFullOfferToClient = (offer) => {
     rating: parseFloat(offer.rating),
     previewImage,
     images,
-    goods: offer.features,
-    bedrooms: offer.rooms,
-    maxAdults: offer.guests,
-    commentsCount: offer.commentsCount,
-    host: offer.author ? {
-      id: offer.author.id,
-      name: offer.author.username,
-      email: offer.author.email,
-      avatarUrl: offer.author.avatar && !offer.author.avatar.startsWith('http') 
-        ? `${baseUrl}${offer.author.avatar}` 
-        : offer.author.avatar,
-      isPro: offer.author.userType === 'pro'
-    } : null
+    goods: goods,
+    bedrooms: offer.rooms || 2,
+    maxAdults: offer.guests || 4,
+    commentsCount: offer.commentsCount || 0,
+    host: host
   };
 };
 

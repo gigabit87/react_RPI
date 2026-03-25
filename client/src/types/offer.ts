@@ -16,6 +16,7 @@ type HostOffer = {
 };
 
 export type FullOffer = {
+    previewImage: any;
     id: string;
     title: string;
     type: string;

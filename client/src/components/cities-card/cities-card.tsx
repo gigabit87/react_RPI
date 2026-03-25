@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { AppRoute } from "../../const";
 import { useAppDispatch } from "../../store/hooks";
-import { toggleFavorite } from "../../store/action";
+import { toggleFavoriteAction } from "../../store/api-action";
 
 type CitiesCardProps = {
   id: string;
@@ -24,7 +24,9 @@ function CitiesCard({ id, title, type, price, previewImage, isPremium, rating, i
 
   const handleFavoriteClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    dispatch(toggleFavorite(id));
+    e.stopPropagation();
+    const newStatus = isFavorite ? 0 : 1;
+    dispatch(toggleFavoriteAction({ offerId: id, status: newStatus }));
   };
 
   const handleMouseEnter = () => {
@@ -37,12 +39,10 @@ function CitiesCard({ id, title, type, price, previewImage, isPremium, rating, i
     onMouseLeave?.();
   };
 
-  // Формируем правильный URL для превью
   const getImageUrl = () => {
     if (!previewImage) return '/img/apartment-01.jpg';
     if (previewImage.startsWith('http')) return previewImage;
-    if (previewImage.startsWith('/static')) return `http://localhost:5000${previewImage}`;
-    return `http://localhost:5000/static/${previewImage}`;
+    return `http://localhost:5000${previewImage}`;
   };
 
   return (
@@ -64,10 +64,6 @@ function CitiesCard({ id, title, type, price, previewImage, isPremium, rating, i
             width="260" 
             height="200" 
             alt={title}
-            onError={(e) => {
-              // Если картинка не загрузилась, показываем заглушку
-              (e.target as HTMLImageElement).src = '/img/apartment-01.jpg';
-            }}
           />
         </Link>
       </div>

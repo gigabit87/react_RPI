@@ -1,12 +1,12 @@
 import { createReducer } from '@reduxjs/toolkit';
 import { changeCity, offersCityList, requireAuthorization, setError, setOffersDataLoadingStatus, toggleFavorite } from './action';
 import { AuthorizationStatus, CITIES_LOCATION } from '../const';
-import { CityOffer, OffersList } from '../types/offer';
+import { CityOffer, OffersList, FullOffer } from '../types/offer';
 import { AuthorizationStatusType } from '../types/authorization-status';
 import { getCity } from '../utils';
 import { setUserData } from './slices/user-slice';
 import { Review } from '../types/review';
-import { fetchReviewsAction } from './api-action';
+import { fetchReviewsAction, fetchOfferAction, fetchFavoriteOffersAction, toggleFavoriteAction } from './api-action';
 
 const defaultCity = getCity('Paris', CITIES_LOCATION);
 
@@ -23,9 +23,13 @@ export type InitialState = {
   isPro: boolean;
   reviews: Review[];
   isReviewsLoading: boolean;
+  currentOffer: FullOffer | null;
+  isOfferLoading: boolean;
+  favoriteOffers: FullOffer[];
+  isFavoriteOffersLoading: boolean;
 }
 
-const initialState : InitialState = {
+const initialState: InitialState = {
   city: defaultCity,
   offers: [],
   isLoading: false,
@@ -38,8 +42,12 @@ const initialState : InitialState = {
   isPro: false,
   reviews: [],
   isReviewsLoading: false,
+  currentOffer: null,
+  isOfferLoading: false,
+  favoriteOffers: [],
+  isFavoriteOffersLoading: false,
 };
-  
+
 const reducer = createReducer(initialState, (builder) => {
   builder
     .addCase(changeCity, (state, action) => {
@@ -52,6 +60,36 @@ const reducer = createReducer(initialState, (builder) => {
       const offer = state.offers.find((o) => o.id === action.payload);
       if (offer) {
         offer.isFavorite = !offer.isFavorite;
+      }
+      if (state.currentOffer && state.currentOffer.id === action.payload) {
+        state.currentOffer.isFavorite = !state.currentOffer.isFavorite;
+      }
+    })
+    .addCase(toggleFavoriteAction.fulfilled, (state, action) => {
+      const { offerId, isFavorite } = action.payload;
+      
+      const offer = state.offers.find((o) => o.id === offerId);
+      if (offer) {
+        offer.isFavorite = isFavorite;
+      }
+      
+      if (state.currentOffer && state.currentOffer.id === offerId) {
+        state.currentOffer.isFavorite = isFavorite;
+      }
+      
+      if (!isFavorite) {
+        const index = state.favoriteOffers.findIndex((o) => o.id === offerId);
+        if (index !== -1) {
+          state.favoriteOffers.splice(index, 1);
+        }
+      } else {
+        const fullOffer = state.currentOffer && state.currentOffer.id === offerId 
+          ? state.currentOffer 
+          : state.offers.find((o) => o.id === offerId);
+        
+        if (fullOffer && !state.favoriteOffers.find((o) => o.id === offerId)) {
+          state.favoriteOffers.push(fullOffer as FullOffer);
+        }
       }
     })
     .addCase(requireAuthorization, (state, action) => {
@@ -78,6 +116,29 @@ const reducer = createReducer(initialState, (builder) => {
     })
     .addCase(fetchReviewsAction.rejected, (state) => {
       state.isReviewsLoading = false;
+    })
+    .addCase(fetchOfferAction.pending, (state) => {
+      state.isOfferLoading = true;
+      state.currentOffer = null;
+    })
+    .addCase(fetchOfferAction.fulfilled, (state, action) => {
+      state.currentOffer = action.payload;
+      state.isOfferLoading = false;
+    })
+    .addCase(fetchOfferAction.rejected, (state) => {
+      state.isOfferLoading = false;
+      state.currentOffer = null;
+    })
+    .addCase(fetchFavoriteOffersAction.pending, (state) => {
+      state.isFavoriteOffersLoading = true;
+    })
+    .addCase(fetchFavoriteOffersAction.fulfilled, (state, action) => {
+      state.favoriteOffers = action.payload;
+      state.isFavoriteOffersLoading = false;
+    })
+    .addCase(fetchFavoriteOffersAction.rejected, (state) => {
+      state.isFavoriteOffersLoading = false;
+      state.favoriteOffers = [];
     });
 });
 

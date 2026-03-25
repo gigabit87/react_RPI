@@ -19,7 +19,12 @@ function ReviewsList({ offerId }: ReviewsListProps): JSX.Element {
   }, [offerId, dispatch]);
 
   if (isReviewsLoading) {
-    return <div className="reviews__list">Loading reviews...</div>;
+    return (
+      <>
+        <h2 className="reviews__title">Reviews</h2>
+        <div className="reviews__list">Loading reviews...</div>
+      </>
+    );
   }
 
   return (

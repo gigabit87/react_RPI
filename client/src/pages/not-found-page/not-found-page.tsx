@@ -20,9 +20,9 @@ function NotFoundPage() {
           <section style={{textAlign: 'center', padding: '100px 0'}}>
             <h1 style={{fontSize: '48px', marginBottom: '20px'}}>404</h1>
             <h2 style={{marginBottom: '20px'}}>Page Not Found</h2>
-            <p style={{marginBottom: '30px'}}>The page you are looking for does not exist.</p>
+            <p style={{marginBottom: '30px'}}>Страница не найдена</p>
             <Link to={AppRoute.Main} style={{color: '#4481c3', textDecoration: 'underline'}}>
-              Go to main page
+              На главную
             </Link>
           </section>
         </div>

@@ -20,18 +20,15 @@ function Header(): JSX.Element {
         dispatch(logoutAction());
     };
 
-    // Формируем полный URL аватара
     const getAvatarUrl = () => {
         if (userAvatarUrl) {
-            if (userAvatarUrl.startsWith('http')) {
-                return userAvatarUrl;
-            }
-            return `http://localhost:5000${userAvatarUrl}`;
+            if (userAvatarUrl.startsWith('http')) return userAvatarUrl;
+            if (userAvatarUrl.startsWith('/static')) return `http://localhost:5000${userAvatarUrl}`;
+            return `http://localhost:5000/static/${userAvatarUrl}`;
         }
         return '/img/avatar.svg';
     };
 
-    // Отображаемое имя: username или email или "User"
     const displayName = userUsername || userEmail || 'User';
 
     return (
@@ -42,48 +39,56 @@ function Header(): JSX.Element {
                         <Logo />
                     </div>
                     <nav className="header__nav">
-                      <ul className="header__nav-list">
-                        {isAuth ? (
-                          <>
-                            <li className="header__nav-item user">
-                              <Link className="header__nav-link header__nav-link--profile" to={AppRoute.Favourites}>
-                                <div className="header__avatar-wrapper user__avatar-wrapper">
-                                  <img
-                                    className="header__avatar user__avatar"
-                                    src={getAvatarUrl()}
-                                    alt="User avatar"
-                                    width="20"
-                                    height="20"
-                                  />
-                                </div>
-                                <span className="header__user-name user__name">{displayName}</span>
-                                {favoriteCount > 0 && (
-                                  <span className="header__favorite-count">{favoriteCount}</span>
-                                )}
-                              </Link>
-                            </li>
-                            <li className="header__nav-item">
-                              <Link 
-                                className="header__nav-link" 
-                                to="#"
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  handleSignOut();
-                                }}
-                              >
-                                <span className="header__signout">Sign out</span>
-                              </Link>
-                            </li>
-                          </>
-                        ) : (
-                          <li className="header__nav-item user">
-                            <Link className="header__nav-link header__nav-link--profile" to={AppRoute.Login}>
-                              <div className="header__avatar-wrapper user__avatar-wrapper"></div>
-                              <span className="header__login">Sign in</span>
-                            </Link>
-                          </li>
-                        )}
-                      </ul>
+                        <ul className="header__nav-list">
+                            {isAuth ? (
+                                // Авторизованный пользователь
+                                <>
+                                    <li className="header__nav-item user">
+                                        <Link 
+                                            className="header__nav-link header__nav-link--profile" 
+                                            to={AppRoute.Favourites}
+                                        >
+                                            <div className="header__avatar-wrapper user__avatar-wrapper">
+                                                <img
+                                                    className="header__avatar user__avatar"
+                                                    src={getAvatarUrl()}
+                                                    alt="User avatar"
+                                                    width="20"
+                                                    height="20"
+                                                />
+                                            </div>
+                                            <span className="header__user-name user__name">{displayName}</span>
+                                            {favoriteCount > 0 && (
+                                                <span className="header__favorite-count">{favoriteCount}</span>
+                                            )}
+                                        </Link>
+                                    </li>
+                                    <li className="header__nav-item">
+                                        <Link 
+                                            className="header__nav-link" 
+                                            to="#"
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                handleSignOut();
+                                            }}
+                                        >
+                                            <span className="header__signout">Sign out</span>
+                                        </Link>
+                                    </li>
+                                </>
+                            ) : (
+                                // Неавторизованный пользователь (гость)
+                                <li className="header__nav-item user">
+                                    <Link 
+                                        className="header__nav-link header__nav-link--profile" 
+                                        to={AppRoute.Login}
+                                    >
+                                        <div className="header__avatar-wrapper user__avatar-wrapper"></div>
+                                        <span className="header__login">Sign in</span>
+                                    </Link>
+                                </li>
+                            )}
+                        </ul>
                     </nav>
                 </div>
             </div>

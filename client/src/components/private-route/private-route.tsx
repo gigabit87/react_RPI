@@ -13,4 +13,4 @@ function PrivateRoute({ children }: PropsWithChildren) {
     );
 }
 
-export { PrivateRoute }
+export { PrivateRoute };

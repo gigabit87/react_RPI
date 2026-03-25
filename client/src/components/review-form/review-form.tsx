@@ -12,6 +12,7 @@ function ReviewForm({ offerId }: ReviewFormProps): JSX.Element {
   const [selectedRating, setSelectedRating] = useState(0);
   const [reviewText, setReviewText] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+
   const dispatch = useAppDispatch();
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -23,19 +24,22 @@ function ReviewForm({ offerId }: ReviewFormProps): JSX.Element {
     
     try {
       const token = localStorage.getItem('rent-service-token');
-      await api.post(`/comments/${offerId}`, {
-        comment: reviewText,
-        rating: selectedRating
-      }, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
       
-      // Обновляем список отзывов
+      await api.post(
+        `/comments/${offerId}`,
+        {
+          comment: reviewText,
+          rating: selectedRating
+        },
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        }
+      );
+      
       dispatch(fetchReviewsAction(offerId));
       
-      // Очищаем форму
       setSelectedRating(0);
       setReviewText('');
       

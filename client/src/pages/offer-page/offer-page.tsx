@@ -8,11 +8,11 @@ import { Map } from "../../components/map/map";
 import { Header } from "../../components/header/header";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { toggleFavorite } from "../../store/action";
-import { AppRoute } from "../../const";
+import { AppRoute, AuthorizationStatus } from "../../const";
 import { FullOffer } from "../../types/offer";
-import { reviews } from "../../mocks/reviews";
 import { api } from "../../store";
 import { LoadingPage } from "../loading-page/loading-page";
+import { toggleFavoriteAction } from "../../store/api-action";
 
 function OfferPage(): JSX.Element {
     const { id } = useParams<{ id: string }>();
@@ -21,8 +21,8 @@ function OfferPage(): JSX.Element {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     
-    // Получаем список офферов для nearby (из Redux)
     const allOffers = useAppSelector((state) => state.offers);
+    const authorizationStatus = useAppSelector((state) => state.authorizationStatus);
 
     useEffect(() => {
         if (!id) return;
@@ -36,6 +36,7 @@ function OfferPage(): JSX.Element {
             } catch (err) {
                 console.error('Failed to load offer:', err);
                 setError('Failed to load offer');
+                setOffer(null);
             } finally {
                 setIsLoading(false);
             }
@@ -49,7 +50,7 @@ function OfferPage(): JSX.Element {
     }
 
     if (!id || !offer || error) {
-        return <Navigate to={AppRoute.Main} replace />;
+        return <Navigate to="/404" replace />;
     }
 
     const ratingPercent = Math.round(offer.rating * 20);
@@ -70,6 +71,8 @@ function OfferPage(): JSX.Element {
             title: o.title
         }))
     ];
+
+    const isAuth = authorizationStatus === AuthorizationStatus.Auth;
 
     return (
         <div className="page">
@@ -104,7 +107,11 @@ function OfferPage(): JSX.Element {
                                     className={`offer__bookmark-button button ${offer.isFavorite ? 'offer__bookmark-button--active' : ''}`}
                                     type="button"
                                     onClick={() => {
-                                        dispatch(toggleFavorite(offer.id));
+                                        const handleFavoriteClick = () => {
+                                          const newStatus = offer.isFavorite ? 0 : 1;
+                                          dispatch(toggleFavoriteAction({ offerId: offer.id, status: newStatus }));
+                                          setOffer({ ...offer, isFavorite: !offer.isFavorite });
+                                        };
                                         setOffer({ ...offer, isFavorite: !offer.isFavorite });
                                     }}
                                 >
@@ -172,8 +179,8 @@ function OfferPage(): JSX.Element {
                                 </div>
                             </div>
                             <section className="offer__reviews reviews">
-                              <ReviewsList offerId={offer.id} />
-                              <ReviewForm offerId={offer.id} />
+                                <ReviewsList offerId={offer.id} />
+                                {isAuth && <ReviewForm offerId={offer.id} />}
                             </section>
                         </div>
                     </div>

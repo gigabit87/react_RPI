@@ -17,4 +17,3 @@ function FavoriteCardList({ offers }: FavoriteCardListProps): JSX.Element {
 }
 
 export { FavoriteCardList };
-

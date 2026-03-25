@@ -2,12 +2,13 @@ const Setting = {
     rentOffersCount: 312,
 } as const;
 
-const AppRoute = {
+export const AppRoute = {
     Main: '/',
     Login: '/login', 
     Favourites: '/favorites',
     Offer: '/offer',
 } as const;
+
 
 const Cities = [ 
   'Paris',
@@ -93,7 +94,6 @@ export const APIRoute = {
 export const TIMEOUT_SHOW_ERROR = 2000;
 
 export {Setting};
-export {AppRoute};
 export {AuthorizationStatus};
 export {Cities};
 export {CITIES_LOCATION};
