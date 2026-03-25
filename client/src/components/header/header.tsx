@@ -1,24 +1,38 @@
 import { JSX } from "react";
 import { Link } from "react-router-dom";
 import { Logo } from "../logo/logo";
-import { AppRoute } from "../../const";
+import { AppRoute, AuthorizationStatus } from "../../const";
 import { useAppSelector, useAppDispatch } from "../../store/hooks";
-import { requireLogout } from "../../store/slices/user-slice";
-import { useNavigate } from "react-router-dom";
+import { logoutAction } from "../../store/api-action";
 
 function Header(): JSX.Element {
-    const { authorizationStatus, email } = useAppSelector((state) => state.user);
-    const offers = useAppSelector((state) => state.offers);
+    const authorizationStatus = useAppSelector((state) => state.authorizationStatus);
+    const offers = useAppSelector((state) => state.offers || []);
+    const userEmail = useAppSelector((state) => state.email);
+    const userUsername = useAppSelector((state) => state.username);
+    const userAvatarUrl = useAppSelector((state) => state.avatarUrl);
     const dispatch = useAppDispatch();
-    const navigate = useNavigate();
     
-    const favoriteCount = offers ? offers.filter((offer) => offer.isFavorite).length : 0;
-    const isAuth = authorizationStatus === 'AUTH';
+    const favoriteCount = offers.filter((offer) => offer.isFavorite).length;
+    const isAuth = authorizationStatus === AuthorizationStatus.Auth;
 
     const handleSignOut = () => {
-        dispatch(requireLogout());
-        navigate(AppRoute.Main);
+        dispatch(logoutAction());
     };
+
+    // Формируем полный URL аватара
+    const getAvatarUrl = () => {
+        if (userAvatarUrl) {
+            if (userAvatarUrl.startsWith('http')) {
+                return userAvatarUrl;
+            }
+            return `http://localhost:5000${userAvatarUrl}`;
+        }
+        return '/img/avatar.svg';
+    };
+
+    // Отображаемое имя: username или email или "User"
+    const displayName = userUsername || userEmail || 'User';
 
     return (
         <header className="header">
@@ -29,21 +43,46 @@ function Header(): JSX.Element {
                     </div>
                     <nav className="header__nav">
                       <ul className="header__nav-list">
-                        <li className="header__nav-item user">
-                          <Link className="header__nav-link header__nav-link--profile" to={AppRoute.Favourites}>
-                            <div className="header__avatar-wrapper user__avatar-wrapper">
-                              <img
-                                className="header__avatar user__avatar"
-                                src="/img/avatar.svg"
-                                alt="User avatar"
-                              />
-                            </div>
-                            <span className="header__user-name user__name">{email || 'User'}</span>
-                            {favoriteCount > 0 && (
-                              <span className="header__favorite-count">{favoriteCount}</span>
-                            )}
-                          </Link>
-                        </li>
+                        {isAuth ? (
+                          <>
+                            <li className="header__nav-item user">
+                              <Link className="header__nav-link header__nav-link--profile" to={AppRoute.Favourites}>
+                                <div className="header__avatar-wrapper user__avatar-wrapper">
+                                  <img
+                                    className="header__avatar user__avatar"
+                                    src={getAvatarUrl()}
+                                    alt="User avatar"
+                                    width="20"
+                                    height="20"
+                                  />
+                                </div>
+                                <span className="header__user-name user__name">{displayName}</span>
+                                {favoriteCount > 0 && (
+                                  <span className="header__favorite-count">{favoriteCount}</span>
+                                )}
+                              </Link>
+                            </li>
+                            <li className="header__nav-item">
+                              <Link 
+                                className="header__nav-link" 
+                                to="#"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  handleSignOut();
+                                }}
+                              >
+                                <span className="header__signout">Sign out</span>
+                              </Link>
+                            </li>
+                          </>
+                        ) : (
+                          <li className="header__nav-item user">
+                            <Link className="header__nav-link header__nav-link--profile" to={AppRoute.Login}>
+                              <div className="header__avatar-wrapper user__avatar-wrapper"></div>
+                              <span className="header__login">Sign in</span>
+                            </Link>
+                          </li>
+                        )}
                       </ul>
                     </nav>
                 </div>
@@ -53,4 +92,3 @@ function Header(): JSX.Element {
 }
 
 export { Header };
-

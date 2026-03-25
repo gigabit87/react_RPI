@@ -37,6 +37,14 @@ function CitiesCard({ id, title, type, price, previewImage, isPremium, rating, i
     onMouseLeave?.();
   };
 
+  // Формируем правильный URL для превью
+  const getImageUrl = () => {
+    if (!previewImage) return '/img/apartment-01.jpg';
+    if (previewImage.startsWith('http')) return previewImage;
+    if (previewImage.startsWith('/static')) return `http://localhost:5000${previewImage}`;
+    return `http://localhost:5000/static/${previewImage}`;
+  };
+
   return (
     <article 
       className="cities__card place-card"
@@ -52,10 +60,14 @@ function CitiesCard({ id, title, type, price, previewImage, isPremium, rating, i
         <Link to={`${AppRoute.Offer}/${id}`}>
           <img 
             className="place-card__image" 
-            src={previewImage.startsWith('/') ? previewImage : `/${previewImage}`} 
+            src={getImageUrl()} 
             width="260" 
             height="200" 
-            alt="Place image"
+            alt={title}
+            onError={(e) => {
+              // Если картинка не загрузилась, показываем заглушку
+              (e.target as HTMLImageElement).src = '/img/apartment-01.jpg';
+            }}
           />
         </Link>
       </div>

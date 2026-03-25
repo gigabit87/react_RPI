@@ -3,12 +3,13 @@ import ReactDOM from 'react-dom/client'
 import { Provider } from 'react-redux'
 import App from './components/app/app'
 import { store } from './store'
-import { Setting } from './const'
-import { offers } from './mocks/offers'
-import { offersList } from './mocks/offers-list'
-import { offersCityList } from './store/action'
+import { ErrorMessage } from './components/error-message/error-message'
+import { checkAuthAction, fetchOffersAction } from './store/api-action'
+import './index.css';
 
-store.dispatch(offersCityList(offersList))
+store.dispatch(checkAuthAction()).then(() => {
+  store.dispatch(fetchOffersAction());
+});
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
@@ -17,10 +18,8 @@ const root = ReactDOM.createRoot(
 root.render(
   <React.StrictMode>
     <Provider store={store}>
-    <App 
-      offers={offers}
-        offersList={offersList}
-    />
+      <ErrorMessage/>
+      <App />
     </Provider>
   </React.StrictMode>
-)
+);

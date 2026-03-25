@@ -1,15 +1,49 @@
 import { JSX, FormEvent, useState } from "react";
 import { FormRatingInput } from "../form-rating-input/form-rating-input";
+import { useAppDispatch } from "../../store/hooks";
+import { api } from "../../store";
+import { fetchReviewsAction } from "../../store/api-action";
 
-function ReviewForm(): JSX.Element {
+type ReviewFormProps = {
+  offerId: string;
+};
+
+function ReviewForm({ offerId }: ReviewFormProps): JSX.Element {
   const [selectedRating, setSelectedRating] = useState(0);
   const [reviewText, setReviewText] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const dispatch = useAppDispatch();
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log('Review submitted:', { rating: selectedRating, text: reviewText });
-    setSelectedRating(0);
-    setReviewText('');
+    
+    if (isSubmitting) return;
+    
+    setIsSubmitting(true);
+    
+    try {
+      const token = localStorage.getItem('rent-service-token');
+      await api.post(`/comments/${offerId}`, {
+        comment: reviewText,
+        rating: selectedRating
+      }, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      // Обновляем список отзывов
+      dispatch(fetchReviewsAction(offerId));
+      
+      // Очищаем форму
+      setSelectedRating(0);
+      setReviewText('');
+      
+    } catch (error) {
+      console.error('Failed to submit review:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -54,6 +88,7 @@ function ReviewForm(): JSX.Element {
         placeholder="Tell how was your stay, what you like and what can be improved"
         value={reviewText}
         onChange={(e) => setReviewText(e.target.value)}
+        disabled={isSubmitting}
       />
       <div className="reviews__button-wrapper">
         <p className="reviews__help">
@@ -62,9 +97,9 @@ function ReviewForm(): JSX.Element {
         <button 
           className="reviews__submit form__submit button" 
           type="submit"
-          disabled={!selectedRating || reviewText.length < 50}
+          disabled={!selectedRating || reviewText.length < 50 || isSubmitting}
         >
-          Submit
+          {isSubmitting ? 'Submitting...' : 'Submit'}
         </button>
       </div>
     </form>
@@ -72,4 +107,3 @@ function ReviewForm(): JSX.Element {
 }
 
 export { ReviewForm };
-

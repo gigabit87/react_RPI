@@ -6,15 +6,20 @@ const cityCoordinates = {
    Hamburg: { latitude: 53.5511, longitude: 9.9937, zoom: 13 },
    Dusseldorf: { latitude: 51.2277, longitude: 6.7735, zoom: 13 }
  };
-  const getBaseUrl = () => `${process.env.HOST}:${process.env.PORT || 5000}`;
-  const adaptOfferToClient = (offer) => {
+ 
+ const getBaseUrl = () => `http://localhost:5000`; // ← упрощаем
+ 
+ const adaptOfferToClient = (offer) => {
    const baseUrl = getBaseUrl();
    const cityLocation = cityCoordinates[offer.city];
+   
+   // Формируем полный URL для previewImage
    let previewImage = offer.previewImage;
-    if (previewImage && !previewImage.startsWith('http')) {
-     previewImage = `${baseUrl}${previewImage.startsWith('/') ? '' : '/'}${previewImage}`;
+   if (previewImage && !previewImage.startsWith('http')) {
+     previewImage = `${baseUrl}${previewImage}`;
    }
-    return {
+   
+   return {
      id: String(offer.id),
      title: offer.title,
      type: offer.type,
@@ -33,11 +38,6 @@ const cityCoordinates = {
      previewImage
    };
  };
-
-
-
-
- 
 
 export const adaptFullOfferToClient = (offer) => {
   const baseUrl = getBaseUrl();
@@ -78,13 +78,12 @@ export const adaptFullOfferToClient = (offer) => {
       id: offer.author.id,
       name: offer.author.username,
       email: offer.author.email,
-      avatarUrl: offer.author.avatar.startsWith('http') 
-        ? offer.author.avatar 
-        : `${baseUrl}${offer.author.avatar}`,
+      avatarUrl: offer.author.avatar && !offer.author.avatar.startsWith('http') 
+        ? `${baseUrl}${offer.author.avatar}` 
+        : offer.author.avatar,
       isPro: offer.author.userType === 'pro'
     } : null
   };
 };
 
-
- export {adaptOfferToClient};
+export { adaptOfferToClient };

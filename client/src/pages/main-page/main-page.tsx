@@ -6,29 +6,20 @@ import { Map } from "../../components/map/map";
 import { Header } from "../../components/header/header";
 import { useAppSelector } from "../../store/hooks";
 import { getOffersByCity, sortOffersByType } from "../../utils";
-import { OffersList } from "../../types/offer";
 import { SortOffer } from "../../types/sort";
 
-type MainPageProps = {
-    offersList?: OffersList[];
-}
-
-function MainPage({offersList} : MainPageProps): JSX.Element {
+function MainPage(): JSX.Element {
     const selectedCity = useAppSelector((state) => state.city);
     const offers = useAppSelector((state) => state.offers);
     const [selectedOfferId, setSelectedOfferId] = useState<string | null>(null);
     const [activeSort, setActiveSort] = useState<SortOffer>('Popular');
     
-    // Используем offersList если передан, иначе используем из Redux
-    const allOffers = offersList || offers;
-    const selectedCityOffers = getOffersByCity(selectedCity?.name, allOffers);
+    const selectedCityOffers = getOffersByCity(selectedCity?.name, offers);
     const sortedOffers = sortOffersByType(selectedCityOffers, activeSort);
 
-    // Получаем данные города для карты
     const cityData = selectedCity?.location || 
       { latitude: 52.3702157, longitude: 4.8951679, zoom: 13 };
 
-    // Подготавливаем точки для карты
     const mapPoints = sortedOffers.map(offer => ({
       id: offer.id,
       location: offer.location,
@@ -37,51 +28,52 @@ function MainPage({offersList} : MainPageProps): JSX.Element {
 
     const rentalOffersCount = sortedOffers.length;
 
-    return(<div className ="page page--gray page--main">
-      <Header />
-
-      <main className ="page__main page__main--index">
-        <h1 className ="visually-hidden">Cities</h1>
-        <div className ="tabs">
-          <section className ="locations container">
-            <CitiesList selectedCity={selectedCity} />
-          </section>
-        </div>
-        <div className ="cities">
-          <div className ="cities__places-container container">
-            <section className ="cities__places places">
-              <h2 className ="visually-hidden">Places</h2>
-              <b className ="places__found">{rentalOffersCount} places to stay in {selectedCity?.name}</b>
-              <SortOptions 
-                activeSorting={activeSort} 
-                onChange={(newSorting) => setActiveSort(newSorting)} 
-              />
-              {sortedOffers.length > 0 ? (
-                <CitiesCardList 
-                  offersList={sortedOffers}
-                  onCardHover={setSelectedOfferId}
-                  onCardLeave={() => setSelectedOfferId(null)}
-                />
-              ) : (
-                <div className="cities__places-list places__list tabs__content">
-                  <div className="cities__no-places">
-                    <p>No places available in {selectedCity?.name}</p>
-                  </div>
+    return(
+        <div className="page page--gray page--main">
+            <Header />
+            <main className="page__main page__main--index">
+                <h1 className="visually-hidden">Cities</h1>
+                <div className="tabs">
+                    <section className="locations container">
+                        <CitiesList selectedCity={selectedCity} />
+                    </section>
                 </div>
-              )}
-            </section>
-            <div className="cities__right-section">
-              <Map 
-                city={cityData}
-                points={mapPoints}
-                selectedPoint={selectedOfferId}
-                className="cities__map"
-              />
-            </div>
-          </div>
+                <div className="cities">
+                    <div className="cities__places-container container">
+                        <section className="cities__places places">
+                            <h2 className="visually-hidden">Places</h2>
+                            <b className="places__found">{rentalOffersCount} places to stay in {selectedCity?.name}</b>
+                            <SortOptions 
+                                activeSorting={activeSort} 
+                                onChange={(newSorting) => setActiveSort(newSorting)} 
+                            />
+                            {sortedOffers.length > 0 ? (
+                                <CitiesCardList 
+                                    offersList={sortedOffers}
+                                    onCardHover={setSelectedOfferId}
+                                    onCardLeave={() => setSelectedOfferId(null)}
+                                />
+                            ) : (
+                                <div className="cities__places-list places__list tabs__content">
+                                    <div className="cities__no-places">
+                                        <p>No places available in {selectedCity?.name}</p>
+                                    </div>
+                                </div>
+                            )}
+                        </section>
+                        <div className="cities__right-section">
+                            <Map 
+                                city={cityData}
+                                points={mapPoints}
+                                selectedPoint={selectedOfferId}
+                                className="cities__map"
+                            />
+                        </div>
+                    </div>
+                </div>
+            </main>
         </div>
-      </main>
-    </div>);
+    );
 }
 
 export { MainPage };

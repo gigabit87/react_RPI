@@ -78,15 +78,23 @@ const SortOffersType = {
   TopRated: 'Top rated first',
 } as const;
 
-const AutorizationStatus = {
+const AuthorizationStatus = {
     Auth: 'AUTH',
     NoAuth: 'NO_AUTH',
     Unknown: 'UNKNOWN',
 }
 
+export const APIRoute = {
+  Offers : '/offers',
+  Login : '/login',
+  Logout : '/logout',
+}
+
+export const TIMEOUT_SHOW_ERROR = 2000;
+
 export {Setting};
 export {AppRoute};
-export {AutorizationStatus};
+export {AuthorizationStatus};
 export {Cities};
 export {CITIES_LOCATION};
 export {SortOffersType};

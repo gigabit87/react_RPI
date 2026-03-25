@@ -1,22 +1,15 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { reducer } from './reducer';
-import { userReducer } from './slices/user-slice';
-import { CityOffer, OffersList } from '../types/offer';
+import { createAPI } from '../services/api';
+
+export const api = createAPI();
 
 export const store = configureStore({
-  reducer: {
-    city: (state: CityOffer | undefined, action) => {
-      const result = reducer(state ? { city: state, offers: [] } : undefined, action);
-      return result.city;
-    },
-    offers: (state: OffersList[] | undefined, action) => {
-      const result = reducer(state ? { city: undefined, offers: state } : undefined, action);
-      return result.offers;
-    },
-    user: userReducer,
-  },
+  reducer,
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      thunk: {
+        extraArgument: api,
+      },
+    }),
 });
-
-export type RootState = ReturnType<typeof store.getState>;
-export type AppDispatch = typeof store.dispatch;
-

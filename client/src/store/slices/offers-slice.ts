@@ -28,6 +28,11 @@ const offersSlice = createSlice({
     setSelectedOffer: (state, action: PayloadAction<FullOffer | null>) => {
       state.selectedOffer = action.payload;
     },
+    //
+    setLoadingStatus: (state, action: PayloadAction<boolean>) => {
+      state.isLoading = action.payload;
+    },
+    //
     toggleFavorite: (state, action: PayloadAction<string>) => {
       const offer = state.offers.find((o) => o.id === action.payload);
       if (offer) {
@@ -40,6 +45,6 @@ const offersSlice = createSlice({
   },
 });
 
-export const { setOffers, setSelectedCity, setSelectedOffer, toggleFavorite } = offersSlice.actions;
+export const { setOffers, setSelectedCity, setSelectedOffer, setLoadingStatus, toggleFavorite } = offersSlice.actions;
 export const offersReducer = offersSlice.reducer;
 

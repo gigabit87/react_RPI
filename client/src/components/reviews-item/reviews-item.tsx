@@ -10,16 +10,27 @@ function ReviewsItem({ review }: ReviewsItemProps): JSX.Element{
     const date = new Date(review.date);
     const formattedDate = date.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
 
+
+    const getAvatarUrl = () => {
+      if (!review.user.avatarUrl) return '/img/avatar.svg';
+      if (review.user.avatarUrl.startsWith('http')) return review.user.avatarUrl;
+      if (review.user.avatarUrl.startsWith('/static')) return `http://localhost:5000${review.user.avatarUrl}`;
+      return `http://localhost:5000/static/${review.user.avatarUrl}`;
+    };
+
     return(
         <li className="reviews__item">
             <div className="reviews__user user">
                 <div className="reviews__avatar-wrapper user__avatar-wrapper">
                     <img 
                         className="reviews__avatar user__avatar" 
-                        src={review.user.avatarUrl.startsWith('/') ? review.user.avatarUrl : `/img/${review.user.avatarUrl}`} 
+                        src={getAvatarUrl()} 
                         width="54" 
                         height="54" 
                         alt="Reviews avatar"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = '/img/avatar.svg';
+                        }}
                     />
                 </div>
                 <span className="reviews__user-name">

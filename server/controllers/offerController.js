@@ -14,7 +14,7 @@ async function getAllOffers(req, res, next) {
     }
 }
 
-export async function createOffer(req, res, next) {
+async function createOffer(req, res, next) {
  try {
    const {
      title, description, publishDate, city,
@@ -22,20 +22,16 @@ export async function createOffer(req, res, next) {
      features, commentsCount, latitude, longitude, userId
    } = req.body;
 
-
    if (!req.files?.previewImage || req.files.previewImage.length === 0) {
      return next(ApiError.badRequest('Превью изображение обязательно для загрузки'));
    }
 
-
    const previewImagePath = `/static/${req.files.previewImage[0].filename}`;
-
 
    let processedPhotos = [];
    if (req.files?.photos) {
      processedPhotos = req.files.photos.map(file => `/static/${file.filename}`);
    }
-
 
    let parsedFeatures = [];
    if (features) {
@@ -45,7 +41,6 @@ export async function createOffer(req, res, next) {
        parsedFeatures = features.split(',');
      }
    }
-
 
    const offer = await Offer.create({
      title,
@@ -68,18 +63,13 @@ export async function createOffer(req, res, next) {
      authorId: userId
    });
 
-
    return res.status(201).json(offer);
  } catch (error) {
    next(ApiError.internal('Не удалось добавить предложение: ' + error.message));
  }
 }
 
-
-
-
-
-export const getFullOffer = async (req, res, next) => {
+async function getFullOffer(req, res, next) {
   try {
     const { id } = req.params;
 
@@ -100,9 +90,9 @@ export const getFullOffer = async (req, res, next) => {
   } catch (error) {
     next(ApiError.internal('Ошибка при получении детальной информации об объявлении'));
   }
-};
+}
 
-const getFavoriteOffers = async (req, res, next) => {
+async function getFavoriteOffers(req, res, next) {
     try {
         const favoriteOffers = await Offer.findAll({
             where: { isFavorite: true },
@@ -121,9 +111,9 @@ const getFavoriteOffers = async (req, res, next) => {
         console.error('Error in getFavoriteOffers:', error);
         next(ApiError.internal('Не удалось получить список избранных предложений'));
     }
-};
+}
 
-const toggleFavorite = async (req, res, next) => {
+async function toggleFavorite(req, res, next) {
   try {
     const { offerId, status } = req.params;
 
@@ -139,7 +129,6 @@ const toggleFavorite = async (req, res, next) => {
   } catch (error) {
     next(ApiError.internal('Ошибка при обновлении статуса избранного'));
   }
-};
+}
 
-
-export {getAllOffers, getFavoriteOffers, toggleFavorite};
+export { getAllOffers, createOffer, getFullOffer, getFavoriteOffers, toggleFavorite };
