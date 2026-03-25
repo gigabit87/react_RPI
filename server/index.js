@@ -7,6 +7,11 @@ import errorMiddleware from './middleware/ErrorHandlingMiddleware.js'
 import { fileURLToPath } from 'url';
 import path from 'path';
 
+import swaggerUi from 'swagger-ui-express';
+import YAML from 'yamljs';
+
+
+
 dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
@@ -26,6 +31,13 @@ app.use(errorMiddleware);
 app.get('/', (req, res)=>{
     res.status(200).json({message: 'Ура! Все заработало!'})
 })
+
+
+
+const swaggerDocument = YAML.load('./docs/swagger.yaml');
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
+
 
 const start = async () => {
     try {

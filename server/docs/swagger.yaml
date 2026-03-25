@@ -1,0 +1,478 @@
+openapi: 3.0.0
+info:
+  title: Housing Rental API
+  version: 1.0.0
+  description: API для работы с предложениями, отзывами и пользователями
+servers:
+  - url: http://localhost:5000
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+        username:
+          type: string
+        avatarUrl:
+          type: string
+        isPro:
+          type: boolean
+      required:
+        - id
+        - email
+        - username
+    Offer:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        type:
+          type: string
+        price:
+          type: number
+        city:
+          type: object
+          properties:
+            name:
+              type: string
+            location:
+              type: object
+              properties:
+                latitude:
+                  type: number
+                longitude:
+                  type: number
+                zoom:
+                  type: integer
+        location:
+          type: object
+          properties:
+            latitude:
+              type: number
+            longitude:
+              type: number
+        isFavorite:
+          type: boolean
+        isPremium:
+          type: boolean
+        rating:
+          type: number
+        previewImage:
+          type: string
+        images:
+          type: array
+          items:
+            type: string
+        goods:
+          type: array
+          items:
+            type: string
+        bedrooms:
+          type: integer
+        maxAdults:
+          type: integer
+        commentsCount:
+          type: integer
+        host:
+          $ref: "#/components/schemas/User"
+    Review:
+      type: object
+      properties:
+        id:
+          type: string
+        comment:
+          type: string
+        rating:
+          type: integer
+        date:
+          type: string
+          format: date-time
+        user:
+          $ref: "#/components/schemas/User"
+tags:
+  - name: Users
+  - name: Offers
+  - name: Reviews
+paths:
+  /login:
+    post:
+      summary: Авторизация пользователя
+      tags:
+        - Users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+              required:
+                - email
+                - password
+            example:
+              email: Emilio24@yahoo.com
+              password: qE4ZggJIPy
+      responses:
+        "200":
+          description: Успешный логин, возвращает токен
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                  id:
+                    type: integer
+                  email:
+                    type: string
+                  username:
+                    type: string
+                  avatarUrl:
+                    type: string
+                  isPro:
+                    type: boolean
+        "400":
+          description: Неверный email или пароль
+        "401":
+          description: Не авторизован
+  /register:
+    post:
+      summary: Регистрация нового пользователя
+      tags:
+        - Users
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+                username:
+                  type: string
+                userType:
+                  type: string
+                  enum:
+                    - normal
+                    - pro
+                avatar:
+                  type: string
+                  format: binary
+              required:
+                - email
+                - password
+                - username
+                - userType
+            example:
+              email: Idell_Muller32@hotmail.com
+              password: 4k1R_IOA_k
+              username: Eduardo
+              userType: normal
+      responses:
+        "200":
+          description: Пользователь успешно создан
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: "#/components/schemas/User"
+        "400":
+          description: Ошибка валидации
+  /logout:
+    delete:
+      summary: Выход из системы
+      tags:
+        - Users
+      security:
+        - bearerAuth: []
+      responses:
+        "204":
+          description: Успешный выход
+  /offers:
+    get:
+      summary: Получение списка всех предложений
+      tags:
+        - Offers
+      responses:
+        "200":
+          description: Список предложений
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Offer"
+        "401":
+          description: Не авторизован
+  /offers/{id}:
+    get:
+      summary: Получение детальной информации о предложении
+      tags:
+        - Offers
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Детальная информация о предложении
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Offer"
+        "404":
+          description: Предложение не найдено
+  /favorite:
+    get:
+      summary: Получение списка избранных предложений
+      tags:
+        - Offers
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Список избранных предложений
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Offer"
+        "401":
+          description: Не авторизован
+  /favorite/{offerId}/{status}:
+    post:
+      summary: Добавление/удаление предложения в/из избранное
+      tags:
+        - Offers
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: offerId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: status
+          in: path
+          required: true
+          schema:
+            type: integer
+            enum:
+              - 0
+              - 1
+          description: 1 - добавить, 0 - удалить
+      responses:
+        "200":
+          description: Статус обновлен
+        "401":
+          description: Не авторизован
+        "404":
+          description: Предложение не найдено
+  /comments/{offerId}:
+    get:
+      summary: Получение списка комментариев для предложения
+      tags:
+        - Reviews
+      parameters:
+        - name: offerId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Список комментариев
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Review"
+        "404":
+          description: Предложение не найдено
+    post:
+      summary: Добавление нового комментария
+      tags:
+        - Reviews
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: offerId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                comment:
+                  type: string
+                rating:
+                  type: integer
+                  minimum: 1
+                  maximum: 5
+              required:
+                - comment
+                - rating
+            example:
+              comment: Terror conduco canis uterque natus appositus dens animadverto. Terebro
+                contigo abbas condico sum absens communis ambitus thema demergo.
+              rating: 3
+      responses:
+        "201":
+          description: Комментарий успешно добавлен
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Review"
+        "400":
+          description: Ошибка валидации
+        "401":
+          description: Не авторизован
+        "404":
+          description: Предложение не найдено
+  /offer:
+    post:
+      summary: Создание нового предложения
+      description: |
+        Создает новое предложение (offer).
+        Принимает данные в формате multipart/form-data.
+        Поле previewImage обязательно.
+        Поле photos - массив из 6 файлов.
+      tags:
+        - Offers
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - title
+                - description
+                - city
+                - price
+                - rooms
+                - guests
+                - previewImage
+              properties:
+                title:
+                  type: string
+                  description: Название предложения
+                description:
+                  type: string
+                  description: Описание предложения
+                publishDate:
+                  type: string
+                  format: date
+                  description: Дата публикации
+                city:
+                  type: string
+                  description: Город (Paris, Cologne, Brussels, Amsterdam, Hamburg, Dusseldorf)
+                isPremium:
+                  type: boolean
+                  description: Премиальность
+                isFavorite:
+                  type: boolean
+                  description: В избранном
+                rating:
+                  type: number
+                  description: Рейтинг от 1 до 5
+                type:
+                  type: string
+                  description: Тип жилья (apartment, house, room, hotel)
+                rooms:
+                  type: integer
+                  description: Количество комнат
+                guests:
+                  type: integer
+                  description: Количество гостей
+                price:
+                  type: number
+                  description: Цена за ночь
+                features:
+                  type: string
+                  description: JSON-строка массива удобств
+                commentsCount:
+                  type: integer
+                  description: Количество комментариев
+                latitude:
+                  type: number
+                  description: Широта
+                longitude:
+                  type: number
+                  description: Долгота
+                userId:
+                  type: integer
+                  description: ID автора
+                previewImage:
+                  type: string
+                  format: binary
+                  description: Основное изображение (обязательно)
+                photos:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+                  description: Дополнительные изображения (6 штук)
+            examples:
+              generated:
+                summary: Generated example (text fields only)
+                value:
+                  title: vilicus cupiditas aegrus
+                  description: Sunt tredecim compello clibanus defessus. Venio alveus adulescens
+                    vester volva dolore asperiores suspendo. Tametsi arma denego
+                    angelus sophismata absque teres fuga consectetur coniuratio.
+                  publishDate: 2026-03-24
+                  city: Dusseldorf
+                  isPremium: false
+                  isFavorite: false
+                  rating: 2.3
+                  type: apartment
+                  rooms: 2
+                  guests: 6
+                  price: 249
+                  features: '["Breakfast","Air conditioning","Laptop friendly workspace","Baby
+                    seat","Washer","Towels","Fridge"]'
+                  commentsCount: 18
+                  latitude: 34.0014
+                  longitude: -3.4599
+                  userId: 3
+      responses:
+        "201":
+          description: Предложение успешно создано
+        "400":
+          description: Ошибка валидации данных
+        "401":
+          description: Не авторизован
