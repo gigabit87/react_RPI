@@ -126,8 +126,8 @@ paths:
                 - email
                 - password
             example:
-              email: Emilio24@yahoo.com
-              password: qE4ZggJIPy
+              email: Betty93@yahoo.com
+              password: Fyj9moYyfQ
       responses:
         "200":
           description: Успешный логин, возвращает токен
@@ -184,10 +184,10 @@ paths:
                 - username
                 - userType
             example:
-              email: Idell_Muller32@hotmail.com
-              password: 4k1R_IOA_k
-              username: Eduardo
-              userType: normal
+              email: Brian22@gmail.com
+              password: dMQ2Lk3pyU
+              username: Vincent
+              userType: pro
       responses:
         "200":
           description: Пользователь успешно создан
@@ -344,9 +344,9 @@ paths:
                 - comment
                 - rating
             example:
-              comment: Terror conduco canis uterque natus appositus dens animadverto. Terebro
-                contigo abbas condico sum absens communis ambitus thema demergo.
-              rating: 3
+              comment: Unus vomica tamdiu patria necessitatibus perspiciatis suffoco taedium
+                acceptus. Fuga aiunt dolores.
+              rating: 1
       responses:
         "201":
           description: Комментарий успешно добавлен
@@ -450,24 +450,24 @@ paths:
               generated:
                 summary: Generated example (text fields only)
                 value:
-                  title: vilicus cupiditas aegrus
-                  description: Sunt tredecim compello clibanus defessus. Venio alveus adulescens
-                    vester volva dolore asperiores suspendo. Tametsi arma denego
-                    angelus sophismata absque teres fuga consectetur coniuratio.
+                  title: agnitio reprehenderit territo
+                  description: Decerno turbo traho denuo concedo cursim clamo vomica. Testimonium
+                    cubitum viscus vix cruciamentum laboriosam venia. Unus totam
+                    contego dolores architecto depono.
                   publishDate: 2026-03-24
                   city: Dusseldorf
                   isPremium: false
                   isFavorite: false
-                  rating: 2.3
-                  type: apartment
-                  rooms: 2
-                  guests: 6
-                  price: 249
+                  rating: 3.9
+                  type: hotel
+                  rooms: 5
+                  guests: 7
+                  price: 363
                   features: '["Breakfast","Air conditioning","Laptop friendly workspace","Baby
                     seat","Washer","Towels","Fridge"]'
-                  commentsCount: 18
-                  latitude: 34.0014
-                  longitude: -3.4599
+                  commentsCount: 14
+                  latitude: -43.9419
+                  longitude: 62.7056
                   userId: 3
       responses:
         "201":

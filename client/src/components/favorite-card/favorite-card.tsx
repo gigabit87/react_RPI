@@ -1,8 +1,8 @@
 import { JSX } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { FullOffer } from "../../types/offer";
-import { AppRoute } from "../../const";
-import { useAppDispatch } from "../../store/hooks";
+import { AppRoute, AuthorizationStatus } from "../../const";
+import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { toggleFavoriteAction } from "../../store/api-action";
 
 type FavoriteCardProps = {
@@ -11,11 +11,20 @@ type FavoriteCardProps = {
 
 function FavoriteCard({ offer }: FavoriteCardProps): JSX.Element {
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
   const ratingPercent = Math.round(offer.rating * 20);
+  const authorizationStatus = useAppSelector((state) => state.authorizationStatus);
+  const isAuth = authorizationStatus === AuthorizationStatus.Auth;
 
   const handleFavoriteClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     e.stopPropagation();
+    
+    if (!isAuth) {
+      navigate(AppRoute.Login);
+      return;
+    }
+    
     dispatch(toggleFavoriteAction({ offerId: offer.id, status: 0 }));
   };
 

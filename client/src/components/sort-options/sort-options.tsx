@@ -57,4 +57,3 @@ function SortOptions({ activeSorting, onChange }: SortPlacesProps): JSX.Element 
 }
 
 export { SortOptions };
-

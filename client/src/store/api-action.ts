@@ -3,7 +3,7 @@ import {createAsyncThunk} from '@reduxjs/toolkit';
 import {AppDispatch, State} from '../types/state.js';
 import { OffersList, FullOffer } from '../types/offer.js';
 import {offersCityList, requireAuthorization, setError, setOffersDataLoadingStatus} from './action';
-import {saveToken, dropToken, getToken} from '../services/token';
+import {saveToken, dropToken} from '../services/token';
 import {APIRoute, AuthorizationStatus, TIMEOUT_SHOW_ERROR} from '../const';
 import {AuthData, UserData} from '../types/user-data';
 import { setUserData } from './slices/user-slice';
@@ -148,6 +148,31 @@ export const fetchOfferAction = createAsyncThunk<
   }
 );
 
+export const toggleFavoriteAction = createAsyncThunk<
+  { offerId: string; isFavorite: boolean },
+  { offerId: string; status: number },
+  { dispatch: AppDispatch; state: State; extra: AxiosInstance }
+>(
+  'data/toggleFavorite',
+  async ({ offerId, status }, { dispatch, extra: api, rejectWithValue }) => {
+    try {
+      const token = localStorage.getItem('rent-service-token');
+      await api.post(
+        `/favorite/${offerId}/${status}`,
+        {},
+        {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        }
+      );
+      return { offerId, isFavorite: status === 1 };
+    } catch (error) {
+      return rejectWithValue('Failed to toggle favorite');
+    }
+  }
+);
+
 export const fetchFavoriteOffersAction = createAsyncThunk<
   FullOffer[],
   void,
@@ -160,31 +185,6 @@ export const fetchFavoriteOffersAction = createAsyncThunk<
       return data;
     } catch (error) {
       return rejectWithValue('Failed to load favorite offers');
-    }
-  }
-);
-
-export const toggleFavoriteAction = createAsyncThunk<
-  { offerId: string; isFavorite: boolean },
-  { offerId: string; status: number },
-  { dispatch: AppDispatch; state: State; extra: AxiosInstance }
->(
-  'data/toggleFavorite',
-  async ({ offerId, status }, { dispatch, extra: api, rejectWithValue }) => {
-    try {
-      const token = getToken();
-      const { data } = await api.post(
-        `/favorite/${offerId}/${status}`,
-        {},
-        {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        }
-      );
-      return { offerId, isFavorite: status === 1 };
-    } catch (error) {
-      return rejectWithValue('Failed to toggle favorite');
     }
   }
 );

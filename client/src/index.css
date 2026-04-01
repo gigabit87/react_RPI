@@ -9,3 +9,11 @@
 .reviews__avatar-wrapper {
   background-image: none !important;
 }
+
+.page__main--index-empty .cities__right-section {
+  background-image: url(/img/no-places.png);
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  min-height: 400px;
+}

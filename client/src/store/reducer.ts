@@ -64,6 +64,10 @@ const reducer = createReducer(initialState, (builder) => {
       if (state.currentOffer && state.currentOffer.id === action.payload) {
         state.currentOffer.isFavorite = !state.currentOffer.isFavorite;
       }
+      const favoriteOfferIndex = state.favoriteOffers.findIndex((o) => o.id === action.payload);
+      if (favoriteOfferIndex !== -1) {
+        state.favoriteOffers.splice(favoriteOfferIndex, 1);
+      }
     })
     .addCase(toggleFavoriteAction.fulfilled, (state, action) => {
       const { offerId, isFavorite } = action.payload;
@@ -81,14 +85,6 @@ const reducer = createReducer(initialState, (builder) => {
         const index = state.favoriteOffers.findIndex((o) => o.id === offerId);
         if (index !== -1) {
           state.favoriteOffers.splice(index, 1);
-        }
-      } else {
-        const fullOffer = state.currentOffer && state.currentOffer.id === offerId 
-          ? state.currentOffer 
-          : state.offers.find((o) => o.id === offerId);
-        
-        if (fullOffer && !state.favoriteOffers.find((o) => o.id === offerId)) {
-          state.favoriteOffers.push(fullOffer as FullOffer);
         }
       }
     })

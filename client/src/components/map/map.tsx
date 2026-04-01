@@ -48,29 +48,27 @@ function Map({ city, points, selectedPoint, className = "cities__map" }: MapProp
     markersRef.current = [];
 
     const defaultIcon = L.icon({
-      iconUrl: "img/pin.svg",
+      iconUrl: "/img/pin.svg",
       iconSize: [27, 39],
       iconAnchor: [13.5, 39],
     });
 
     const activeIcon = L.icon({
-      iconUrl: "img/pin-active.svg",
+      iconUrl: "/img/pin-active.svg",
       iconSize: [27, 39],
       iconAnchor: [13.5, 39],
     });
 
-    if (mapRef.current) {
-      points.forEach((point) => {
-        const isActive = selectedPoint === point.id;
-        const marker = L.marker([point.location.latitude, point.location.longitude], {
-          icon: isActive ? activeIcon : defaultIcon,
-        });
-
-        marker.addTo(mapRef.current!);
-        marker.bindPopup(point.title);
-        markersRef.current.push(marker);
+    points.forEach((point) => {
+      const isActive = selectedPoint === point.id;
+      const marker = L.marker([point.location.latitude, point.location.longitude], {
+        icon: isActive ? activeIcon : defaultIcon,
       });
-    }
+
+      marker.addTo(mapRef.current!);
+      marker.bindPopup(point.title);
+      markersRef.current.push(marker);
+    });
   }, [points, selectedPoint]);
 
   useEffect(() => {
@@ -86,4 +84,3 @@ function Map({ city, points, selectedPoint, className = "cities__map" }: MapProp
 }
 
 export { Map };
-

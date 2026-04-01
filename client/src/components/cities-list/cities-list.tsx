@@ -35,4 +35,3 @@ function CitiesList({ selectedCity }: CitiesListProps): JSX.Element {
 }
 
 export { CitiesList };
-

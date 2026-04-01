@@ -24,4 +24,3 @@ export function sortOffersByType(offers: OffersList[], type: SortOffer): OffersL
       return offers;
   }
 }
-

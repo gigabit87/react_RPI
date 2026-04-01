@@ -31,4 +31,3 @@ function CitiesCardList({ offersList, onCardHover, onCardLeave }: CitiesCardList
 }
 
 export { CitiesCardList };
-
